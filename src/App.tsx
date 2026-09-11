@@ -523,9 +523,10 @@ function App() {
 
   // Computed: enthalpy vector (rate of change per second)
   const deltaT = useMemo(() => {
+    if (!hasLoaded || showInstructions || isLoading) return 0;
     const rate = (displayTemp - prevTemp) / (DECAY_INTERVAL_MS / 1000);
     return rate;
-  }, [displayTemp, prevTemp]);
+  }, [displayTemp, prevTemp, hasLoaded, showInstructions, isLoading]);
 
   // Computed: cursor blink rate — faster as temp rises
   const cursorBlinkMs = useMemo(() => {
@@ -544,6 +545,14 @@ function App() {
 
   // ─── THERMAL DECAY LOOP ────────────────────────────────────────────────────
   useEffect(() => {
+    // Only begin freezing/decaying after loading completes and user gets past the disclaimer
+    if (!hasLoaded || showInstructions || isLoading) {
+      tempRef.current = DEFAULT_TEMP;
+      setDisplayTemp(DEFAULT_TEMP);
+      setPrevTemp(DEFAULT_TEMP);
+      return;
+    }
+
     const interval = setInterval(() => {
       setPrevTemp(tempRef.current);
       if (!isExplodingRef.current) {
@@ -560,7 +569,7 @@ function App() {
       );
     }, DECAY_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, []);
+  }, [hasLoaded, showInstructions, isLoading]);
 
   // ─── OVERHEAT EXPLOSION TRIGGER ──────────────────────────────────────────
   const triggerExplosion = useCallback(() => {
@@ -1008,6 +1017,9 @@ function App() {
         if (e.key === 'Escape' || e.key === ' ' || e.key === 'Enter') {
           e.preventDefault();
           setShowInstructions(false);
+          tempRef.current = DEFAULT_TEMP;
+          setDisplayTemp(DEFAULT_TEMP);
+          setPrevTemp(DEFAULT_TEMP);
           window.setTimeout(() => textareaRef.current?.focus(), 50);
         }
       }
@@ -2161,6 +2173,9 @@ function App() {
           <button
             onClick={() => {
               setShowInstructions(false);
+              tempRef.current = DEFAULT_TEMP;
+              setDisplayTemp(DEFAULT_TEMP);
+              setPrevTemp(DEFAULT_TEMP);
               window.setTimeout(() => textareaRef.current?.focus(), 50);
             }}
             className="flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-mono text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
