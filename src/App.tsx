@@ -548,10 +548,10 @@ function App() {
 
   // Computed: enthalpy vector (rate of change per second)
   const deltaT = useMemo(() => {
-    if (!hasLoaded || showInstructions || isLoading) return 0;
+    if (!hasLoaded || showInstructions || isLoading || showSaveModal) return 0;
     const rate = (displayTemp - prevTemp) / (DECAY_INTERVAL_MS / 1000);
     return rate;
-  }, [displayTemp, prevTemp, hasLoaded, showInstructions, isLoading]);
+  }, [displayTemp, prevTemp, hasLoaded, showInstructions, isLoading, showSaveModal]);
 
   // Computed: cursor blink rate — faster as temp rises
   const cursorBlinkMs = useMemo(() => {
@@ -578,6 +578,12 @@ function App() {
       return;
     }
 
+    // Freeze timer is paused while inside the Save popup; resumes seamlessly upon exiting
+    if (showSaveModal) {
+      setPrevTemp(tempRef.current);
+      return;
+    }
+
     const interval = setInterval(() => {
       setPrevTemp(tempRef.current);
       if (!isExplodingRef.current) {
@@ -594,7 +600,7 @@ function App() {
       );
     }, DECAY_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [hasLoaded, showInstructions, isLoading]);
+  }, [hasLoaded, showInstructions, isLoading, showSaveModal]);
 
   // ─── OVERHEAT EXPLOSION TRIGGER ──────────────────────────────────────────
   const triggerExplosion = useCallback(() => {
