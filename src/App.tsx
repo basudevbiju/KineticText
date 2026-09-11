@@ -1743,15 +1743,93 @@ function App() {
               </div>
             )}
 
-            {/* Collapse Warning Banner */}
+            {/* Absolute Zero Recovery & Shortcuts HUD Popup */}
             {isFailed && (
               <div
-                className="mb-4 flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-rose-900/60 bg-rose-950/30 text-rose-300/90 font-mono font-medium text-[11px] tracking-wide uppercase"
-                role="alert"
-                aria-live="assertive"
+                className="mb-6 flex flex-col items-center justify-center p-5 sm:p-6 rounded-2xl border border-cyan-500/40 bg-slate-950/90 shadow-[0_0_50px_rgba(6,182,212,0.25)] backdrop-blur-2xl z-30 max-w-xl mx-auto w-full animate-in fade-in zoom-in-95 duration-300"
+                role="dialog"
+                aria-label="Absolute Zero Recovery Console"
               >
-                <AlertTriangle className="w-3.5 h-3.5 text-rose-400" aria-hidden="true" />
-                <span>Core collapsed — Zero Kelvin reached · Blow into bellows or reignite to restore</span>
+                {/* Header with Cryo-fracture alert */}
+                <div className="flex items-center gap-2.5 mb-2 text-cyan-300 font-mono font-bold text-xs sm:text-sm tracking-wide uppercase">
+                  <Snowflake className="w-4 h-4 text-cyan-400 animate-spin" style={{ animationDuration: '6s' }} aria-hidden="true" />
+                  <span>CORE CRYO-FRACTURE // 0.0 KELVIN REACHED</span>
+                  <Snowflake className="w-4 h-4 text-cyan-400 animate-spin" style={{ animationDuration: '6s' }} aria-hidden="true" />
+                </div>
+                
+                <p className="text-[11px] font-mono text-slate-400 text-center mb-5 leading-relaxed">
+                  Thermal mass depleted. Words frozen into rigid bodies. Reignite core or engage acoustic bellows.
+                </p>
+
+                {/* Primary Action Row: Reignite + Bellows Mic */}
+                <div className="flex items-center justify-center gap-3 w-full mb-5 flex-wrap">
+                  {/* Primary Reignite Button */}
+                  <button
+                    onClick={() => reignite(DEFAULT_TEMP)}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-mono text-xs font-bold tracking-wide uppercase bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                    title="Reignite thermal core to 75.0°C (Shift+R)"
+                  >
+                    <RotateCcw className="w-4 h-4 text-slate-950" aria-hidden="true" />
+                    <span>Reignite Core</span>
+                    <kbd className="px-1.5 py-0.5 rounded bg-black/20 text-slate-900 text-[10px] font-mono font-semibold">
+                      Shift+R
+                    </kbd>
+                  </button>
+
+                  {/* Bellows Toggle Button with tiny Mic icon */}
+                  <button
+                    onClick={toggleBellows}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-mono text-xs font-semibold tracking-wide uppercase border backdrop-blur-md transition-all cursor-pointer ${
+                      bellowsArmed
+                        ? isBlowing
+                          ? 'bg-amber-950/80 border-amber-500 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)]'
+                          : 'bg-emerald-950/60 border-emerald-500/80 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+                        : 'bg-white/[0.04] hover:bg-white/[0.08] border-white/15 text-slate-300 hover:text-white'
+                    }`}
+                    title={bellowsArmed ? 'Disarm Bellows Mic' : 'Arm Bellows Mic — Blow to generate heat'}
+                  >
+                    {bellowsArmed ? (
+                      isBlowing ? (
+                        <Wind className="w-3.5 h-3.5 text-amber-400 animate-spin" aria-hidden="true" />
+                      ) : (
+                        <Mic className="w-3.5 h-3.5 text-emerald-400 animate-pulse" aria-hidden="true" />
+                      )
+                    ) : (
+                      <Mic className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
+                    )}
+                    <span>{bellowsArmed ? (isBlowing ? 'Turbulence' : 'Bellows Armed') : 'Arm Bellows'}</span>
+                    <span className="text-[9px] text-cyan-300/80 font-normal">(+10°C)</span>
+                  </button>
+                </div>
+
+                {/* Shortcuts Cheatsheet Grid */}
+                <div className="w-full pt-3 border-t border-white/10">
+                  <div className="text-[9px] font-mono text-slate-400 uppercase tracking-wider mb-2 text-center">
+                    Emergency Shortcuts Matrix
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-left">
+                    {[
+                      { key: 'Shift+R', label: 'Reignite Core (75°C)' },
+                      { key: 'Blow Mic', label: 'Acoustic Bellows (+10°)' },
+                      { key: 'Shift+H', label: 'Force Meltdown (120°C)' },
+                      { key: 'Shift+F', label: 'Trigger Zero Kelvin' },
+                      { key: 'Shift+B', label: 'Replay Boot Diagnostics' },
+                      { key: 'Shift+M', label: isMaximized ? 'Restore Viewport' : 'Maximize All Corners' },
+                    ].map(({ key, label }) => (
+                      <div
+                        key={key}
+                        className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06]"
+                      >
+                        <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700 font-mono text-[9px] font-semibold">
+                          {key}
+                        </kbd>
+                        <span className="text-[9px] font-mono text-slate-400 truncate">
+                          {label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
