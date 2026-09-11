@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Flame, Snowflake, Mic, MicOff, RotateCcw, Zap, AlertTriangle, Wind, Activity } from 'lucide-react';
+import { Flame, Snowflake, Mic, MicOff, RotateCcw, Zap, AlertTriangle, Wind, Activity, Terminal } from 'lucide-react';
 import Matter from 'matter-js';
 import LetterGlitch from './LetterGlitch';
 
@@ -450,6 +450,27 @@ function App() {
     setIsLoading(true);
     setLoadingProgress(0);
     setLoadingStatus('INITIALIZING THERMAL CORE...');
+    setShowInstructions(true);
+  }, []);
+
+  // ─── INSTRUCTIONS POPUP & SAVE POPUP (WITH RUNAWAY YES BUTTON) ─────────────
+  const [showInstructions, setShowInstructions] = useState(true);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showRestartToast, setShowRestartToast] = useState(false);
+  const [yesBtnOffset, setYesBtnOffset] = useState({ x: 55, y: 0 });
+  const [evasionCount, setEvasionCount] = useState(0);
+
+  const evadeYesButton = useCallback(() => {
+    setEvasionCount((c) => c + 1);
+    const arenaWidth = 240;
+    const arenaHeight = 70;
+    let targetX = (Math.random() - 0.5) * arenaWidth;
+    let targetY = (Math.random() - 0.5) * arenaHeight;
+    // Keep away from the static "No" button on the left
+    if (targetX < -30 && Math.abs(targetY) < 30) {
+      targetX = targetX + 110;
+    }
+    setYesBtnOffset({ x: targetX, y: targetY });
   }, []);
 
   // Boot sequence simulation
@@ -965,17 +986,63 @@ function App() {
       } else if (key === 'M') {
         e.preventDefault();
         setIsMaximized((prev) => !prev);
+      } else if (key === 'I') {
+        e.preventDefault();
+        setShowInstructions((prev) => !prev);
       }
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, [reignite, triggerExplosion, replayBoot]);
 
-  // ─── KEYSTROKE HEAT INJECTION ─────────────────────────────────────────────
+  // ─── MODAL SHORTCUTS (Escape to close Save modal, Enter/Space for instructions) ──
+  useEffect(() => {
+    const handleModalKeys = (e: KeyboardEvent) => {
+      if (showSaveModal) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          setShowSaveModal(false);
+          textareaRef.current?.focus();
+        }
+      } else if (hasLoaded && showInstructions) {
+        if (e.key === 'Escape' || e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          setShowInstructions(false);
+          window.setTimeout(() => textareaRef.current?.focus(), 50);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleModalKeys);
+    return () => window.removeEventListener('keydown', handleModalKeys);
+  }, [showSaveModal, hasLoaded, showInstructions]);
+
+  // ─── KEYSTROKE HEAT INJECTION & DIRECTIVES ─────────────────────────────────
   const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (isFailed) return;
     if (e.shiftKey && ['F', 'H', 'R', 'B', 'M', 'f', 'h', 'r', 'b', 'm'].includes(e.key)) return;
-    if (['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Backspace', 'Delete'].includes(e.key)) return;
+
+    // Enter: Trigger "Do you want to save?" confirmation popup with runaway Yes button
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      setShowSaveModal(true);
+      setYesBtnOffset({ x: 55, y: 0 });
+      setEvasionCount(0);
+      return;
+    }
+
+    // Delete: Restart from no text
+    if (e.key === 'Delete') {
+      e.preventDefault();
+      setText('');
+      textRef.current = '';
+      setCaretPosition(0);
+      reignite(DEFAULT_TEMP);
+      setShowRestartToast(true);
+      window.setTimeout(() => setShowRestartToast(false), 2200);
+      return;
+    }
+
+    if (['Shift', 'Control', 'Alt', 'Meta', 'CapsLock', 'Backspace'].includes(e.key)) return;
     const next = Math.min(MAX_TEMP, Number((tempRef.current + 3.5).toFixed(1)));
     tempRef.current = next;
     setDisplayTemp(next);
@@ -2013,6 +2080,7 @@ function App() {
               aria-label="Keyboard shortcuts"
             >
               {[
+                { key: 'Shift+I', label: 'RULES' },
                 { key: 'Shift+F', label: 'FREEZE' },
                 { key: 'Shift+H', label: 'DETONATE' },
                 { key: 'Shift+R', label: 'FLUSH' },
@@ -2033,6 +2101,159 @@ function App() {
         </footer>
       </div>
     </div>
+
+    {/* ════════════════════════════════════════════════════════════
+        RESTART TOAST FEEDBACK
+        ════════════════════════════════════════════════════════════ */}
+    {showRestartToast && (
+      <div
+        className="fixed top-6 left-1/2 -translate-x-1/2 z-[130] px-4 py-2.5 rounded-xl bg-slate-950 border-2 border-amber-400 text-amber-300 font-mono text-xs font-bold tracking-wide uppercase shadow-[0_0_35px_rgba(245,158,11,0.5)] flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-200"
+        role="status"
+        aria-live="polite"
+      >
+        <RotateCcw className="w-4 h-4 text-amber-400 animate-spin" aria-hidden="true" />
+        <span>RESTARTED FROM ZERO TEXT // CORE REIGNITED TO 75.0°C</span>
+      </div>
+    )}
+
+    {/* ════════════════════════════════════════════════════════════
+        INSTRUCTIONS POPUP (AFTER LOADING SCREEN, BEFORE TYPING)
+        ════════════════════════════════════════════════════════════ */}
+    {hasLoaded && showInstructions && (
+      <div
+        className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="instructions-modal-title"
+      >
+        <div
+          className="relative w-full max-w-lg p-6 sm:p-7 rounded-2xl border-2 border-amber-400 bg-slate-950 shadow-[0_0_60px_rgba(0,0,0,0.95),0_0_35px_rgba(245,158,11,0.25)] flex flex-col items-center text-center select-none"
+          style={{
+            filter: 'none',
+            WebkitFilter: 'none',
+            backdropFilter: 'none',
+            WebkitBackdropFilter: 'none',
+          }}
+        >
+          {/* Top Accent Pill */}
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-950/60 border border-amber-500/40 text-amber-300 font-mono text-[10px] uppercase tracking-wider mb-3">
+            <Terminal className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
+            <span>REACTOR OPERATING DIRECTIVE</span>
+          </div>
+
+          {/* Title */}
+          <h2 id="instructions-modal-title" className="text-lg sm:text-xl font-mono font-bold text-slate-100 uppercase tracking-wide mb-3">
+            Terminal Instructions
+          </h2>
+
+          {/* Main Prompt requested by user */}
+          <div className="my-2 p-4 rounded-xl bg-slate-900 border border-amber-500/40 w-full text-center shadow-inner">
+            <p className="font-mono text-sm sm:text-base font-bold text-amber-300 tracking-wide leading-relaxed">
+              "Click Enter to Save and Delete for restarting from no text"
+            </p>
+          </div>
+
+          <p className="text-[11px] font-mono text-slate-400 mt-2 mb-6 max-w-sm leading-relaxed">
+            Every keystroke injects thermal energy (+3.5°C). Keep typing or blow into your microphone bellows (+10°C) to stave off cryogenic collapse.
+          </p>
+
+          {/* Enter Reactor / Dismiss Button */}
+          <button
+            onClick={() => {
+              setShowInstructions(false);
+              window.setTimeout(() => textareaRef.current?.focus(), 50);
+            }}
+            className="flex items-center gap-2.5 px-6 py-2.5 rounded-xl font-mono text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+          >
+            <span>Acknowledge & Start Typing</span>
+            <kbd className="px-1.5 py-0.5 rounded bg-black/25 text-slate-900 text-[10px] font-mono">
+              Enter / Space
+            </kbd>
+          </button>
+        </div>
+      </div>
+    )}
+
+    {/* ════════════════════════════════════════════════════════════
+        SAVE CONFIRMATION POPUP (WITH RUNAWAY "YES" BUTTON)
+        ════════════════════════════════════════════════════════════ */}
+    {showSaveModal && (
+      <div
+        className="fixed inset-0 z-[125] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm animate-in fade-in duration-200"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="save-modal-title"
+      >
+        <div
+          className="relative w-full max-w-md p-6 rounded-2xl border-2 border-emerald-400 bg-slate-950 shadow-[0_0_60px_rgba(0,0,0,0.95),0_0_35px_rgba(16,185,129,0.25)] flex flex-col items-center text-center select-none"
+          style={{
+            filter: 'none',
+            WebkitFilter: 'none',
+            backdropFilter: 'none',
+            WebkitBackdropFilter: 'none',
+          }}
+        >
+          {/* Header */}
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 font-mono text-[10px] uppercase tracking-wider mb-3">
+            <AlertTriangle className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
+            <span>SAVE VERIFICATION QUERY</span>
+          </div>
+
+          <h2 id="save-modal-title" className="text-base sm:text-lg font-mono font-bold text-slate-100 uppercase tracking-wide mb-2">
+            Do you want to save?
+          </h2>
+
+          <p className="text-[11px] font-mono text-slate-400 mb-4 max-w-xs leading-relaxed">
+            Choose carefully. Unsaved words remain subject to thermal decay, entropy collapse, and meltdown.
+          </p>
+
+          {/* Runaway Button Arena */}
+          <div className="relative w-full h-32 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 overflow-hidden mb-4 p-4">
+            {/* No Button (Static, positioned reliably on the left) */}
+            <div className="absolute left-6">
+              <button
+                onClick={() => {
+                  setShowSaveModal(false);
+                  window.setTimeout(() => textareaRef.current?.focus(), 50);
+                }}
+                className="px-5 py-2.5 rounded-xl font-mono text-xs font-bold uppercase tracking-wide bg-rose-950/80 hover:bg-rose-900 border border-rose-500/60 text-rose-200 shadow-[0_0_15px_rgba(244,63,94,0.3)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              >
+                No
+              </button>
+            </div>
+
+            {/* Yes Button (Dodge & Run Away!) */}
+            <div
+              className="absolute pointer-events-auto"
+              style={{
+                transform: `translate(${yesBtnOffset.x}px, ${yesBtnOffset.y}px)`,
+                transition: 'transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              }}
+            >
+              <button
+                onMouseEnter={evadeYesButton}
+                onMouseMove={evadeYesButton}
+                onPointerDown={evadeYesButton}
+                onClick={(e) => {
+                  e.preventDefault();
+                  alert("💾 SAVE FAILED // Thermal core vaporized the disk sector. Entropy cannot be stored!");
+                  setShowSaveModal(false);
+                  window.setTimeout(() => textareaRef.current?.focus(), 50);
+                }}
+                className="px-5 py-2.5 rounded-xl font-mono text-xs font-bold uppercase tracking-wide bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 shadow-[0_0_20px_rgba(52,211,153,0.7)] cursor-pointer select-none transition-colors"
+              >
+                {['Yes', 'Nope!', 'Too slow!', 'Missed me!', 'Haha nice try!', 'Can\'t catch me!', 'Almost!'][evasionCount % 7]}
+              </button>
+            </div>
+          </div>
+
+          {/* Footer hint */}
+          <span className="text-[10px] font-mono text-slate-500">
+            Press <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">Esc</kbd> or click "No" to cancel
+          </span>
+        </div>
+      </div>
+    )}
   </div>
   );
 }
