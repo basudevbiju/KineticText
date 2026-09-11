@@ -1143,7 +1143,6 @@ function App() {
 
   // Frost overlay opacity
   const frostOpacity = displayTemp <= 20.0 ? clamp((20.0 - displayTemp) / 20.0, 0, 1) : 0;
-  const frostBlur = frostOpacity * 5;
 
   // Heat bloom opacity
   const heatOpacity = displayTemp > 80.0 ? clamp((displayTemp - 80.0) / 40.0, 0, 0.9) : 0;
@@ -1237,11 +1236,9 @@ function App() {
 
       {/* Frost Vignette Overlay */}
       <div
-        className="fixed inset-0 pointer-events-none z-40 transition-opacity duration-300 frost-overlay"
+        className="fixed inset-0 pointer-events-none z-[5] transition-opacity duration-300 frost-overlay"
         style={{
           opacity: frostOpacity,
-          backdropFilter: frostOpacity > 0 ? `blur(${frostBlur}px)` : 'none',
-          WebkitBackdropFilter: frostOpacity > 0 ? `blur(${frostBlur}px)` : 'none',
         }}
         aria-hidden="true"
       />
@@ -1257,7 +1254,7 @@ function App() {
 
       {/* Collapse Vignette */}
       {isFailed && (
-        <div className="fixed inset-0 pointer-events-none z-38 collapse-overlay" aria-hidden="true" />
+        <div className="fixed inset-0 pointer-events-none z-[6] collapse-overlay" aria-hidden="true" />
       )}
 
       {/* Physics Canvas Layer */}
@@ -1746,7 +1743,13 @@ function App() {
             {/* Absolute Zero Recovery & Shortcuts HUD Popup */}
             {isFailed && (
               <div
-                className="mb-6 flex flex-col items-center justify-center p-5 sm:p-6 rounded-2xl border border-cyan-500/40 bg-slate-950/90 shadow-[0_0_50px_rgba(6,182,212,0.25)] backdrop-blur-2xl z-30 max-w-xl mx-auto w-full animate-in fade-in zoom-in-95 duration-300"
+                className="mb-6 flex flex-col items-center justify-center p-5 sm:p-6 rounded-2xl border-2 border-cyan-400 bg-slate-950 shadow-[0_0_60px_rgba(0,0,0,0.95),0_0_30px_rgba(6,182,212,0.35)] relative z-50 max-w-xl mx-auto w-full animate-in fade-in zoom-in-95 duration-200 select-auto"
+                style={{
+                  filter: 'none',
+                  WebkitFilter: 'none',
+                  backdropFilter: 'none',
+                  WebkitBackdropFilter: 'none',
+                }}
                 role="dialog"
                 aria-label="Absolute Zero Recovery Console"
               >
@@ -1757,7 +1760,7 @@ function App() {
                   <Snowflake className="w-4 h-4 text-cyan-400 animate-spin" style={{ animationDuration: '6s' }} aria-hidden="true" />
                 </div>
                 
-                <p className="text-[11px] font-mono text-slate-400 text-center mb-5 leading-relaxed">
+                <p className="text-[11px] font-mono text-slate-300 text-center mb-5 leading-relaxed">
                   Thermal mass depleted. Words frozen into rigid bodies. Reignite core or engage acoustic bellows.
                 </p>
 
@@ -1771,7 +1774,7 @@ function App() {
                   >
                     <RotateCcw className="w-4 h-4 text-slate-950" aria-hidden="true" />
                     <span>Reignite Core</span>
-                    <kbd className="px-1.5 py-0.5 rounded bg-black/20 text-slate-900 text-[10px] font-mono font-semibold">
+                    <kbd className="px-1.5 py-0.5 rounded bg-black/25 text-slate-900 text-[10px] font-mono font-semibold">
                       Shift+R
                     </kbd>
                   </button>
@@ -1779,12 +1782,12 @@ function App() {
                   {/* Bellows Toggle Button with tiny Mic icon */}
                   <button
                     onClick={toggleBellows}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-mono text-xs font-semibold tracking-wide uppercase border backdrop-blur-md transition-all cursor-pointer ${
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-mono text-xs font-semibold tracking-wide uppercase border transition-all cursor-pointer ${
                       bellowsArmed
                         ? isBlowing
-                          ? 'bg-amber-950/80 border-amber-500 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)]'
-                          : 'bg-emerald-950/60 border-emerald-500/80 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
-                        : 'bg-white/[0.04] hover:bg-white/[0.08] border-white/15 text-slate-300 hover:text-white'
+                          ? 'bg-amber-950 border-amber-500 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.4)]'
+                          : 'bg-emerald-950 border-emerald-500/80 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+                        : 'bg-slate-900 hover:bg-slate-800 border-slate-700 text-slate-200 hover:text-white'
                     }`}
                     title={bellowsArmed ? 'Disarm Bellows Mic' : 'Arm Bellows Mic — Blow to generate heat'}
                   >
@@ -1798,12 +1801,12 @@ function App() {
                       <Mic className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
                     )}
                     <span>{bellowsArmed ? (isBlowing ? 'Turbulence' : 'Bellows Armed') : 'Arm Bellows'}</span>
-                    <span className="text-[9px] text-cyan-300/80 font-normal">(+10°C)</span>
+                    <span className="text-[9px] text-cyan-300/90 font-normal">(+10°C)</span>
                   </button>
                 </div>
 
                 {/* Shortcuts Cheatsheet Grid */}
-                <div className="w-full pt-3 border-t border-white/10">
+                <div className="w-full pt-3 border-t border-slate-800">
                   <div className="text-[9px] font-mono text-slate-400 uppercase tracking-wider mb-2 text-center">
                     Emergency Shortcuts Matrix
                   </div>
@@ -1818,12 +1821,12 @@ function App() {
                     ].map(({ key, label }) => (
                       <div
                         key={key}
-                        className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06]"
+                        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-800"
                       >
-                        <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700 font-mono text-[9px] font-semibold">
+                        <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700 font-mono text-[9px] font-semibold shrink-0">
                           {key}
                         </kbd>
-                        <span className="text-[9px] font-mono text-slate-400 truncate">
+                        <span className="text-[9px] font-mono text-slate-300 truncate">
                           {label}
                         </span>
                       </div>
