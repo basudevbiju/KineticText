@@ -460,16 +460,22 @@ function App() {
   const [yesBtnOffset, setYesBtnOffset] = useState({ x: 55, y: 0 });
   const [evasionCount, setEvasionCount] = useState(0);
   const arenaRef = useRef<HTMLDivElement | null>(null);
+  const lastEvadeTimeRef = useRef(0);
 
-  const evadeYesButton = useCallback((fromX?: number, fromY?: number) => {
+  const evadeYesButton = useCallback((fromX?: number, fromY?: number, force = false) => {
+    const now = performance.now();
+    // Throttle evasion to once every 350ms so the user can easily read the text
+    if (!force && now - lastEvadeTimeRef.current < 350) return;
+    lastEvadeTimeRef.current = now;
+
     setEvasionCount((c) => c + 1);
-    const arenaWidth = 240;
-    const arenaHeight = 70;
+    const arenaWidth = 220;
+    const arenaHeight = 65;
     let targetX = (Math.random() - 0.5) * arenaWidth;
     let targetY = (Math.random() - 0.5) * arenaHeight;
     // Dodge away in the opposite direction of incoming mouse
     if (typeof fromX === 'number' && typeof fromY === 'number') {
-      targetX = fromX > 0 ? -(40 + Math.random() * 70) : (40 + Math.random() * 70);
+      targetX = fromX > 0 ? -(45 + Math.random() * 60) : (45 + Math.random() * 60);
       targetY = fromY > 0 ? -(15 + Math.random() * 20) : (15 + Math.random() * 20);
     }
     // Keep away from the static "No" button on the left
@@ -487,7 +493,7 @@ function App() {
     const mouseX = e.clientX - rect.left - centerX;
     const mouseY = e.clientY - rect.top - centerY;
     const dist = Math.hypot(mouseX - yesBtnOffset.x, mouseY - yesBtnOffset.y);
-    if (dist < 85) {
+    if (dist < 75) {
       evadeYesButton(mouseX, mouseY);
     }
   }, [yesBtnOffset, evadeYesButton]);
@@ -2260,15 +2266,15 @@ function App() {
               </button>
             </div>
 
-            {/* Yes Button (Completely Unclickable — Dodges away on proximity!) */}
+            {/* Yes Button (Completely Unclickable — Smoothly Dodges Away & Readable!) */}
             <div
-              className="absolute pointer-events-auto p-10 -m-10 flex items-center justify-center cursor-not-allowed"
-              onMouseEnter={() => evadeYesButton()}
+              className="absolute pointer-events-auto p-8 -m-8 flex items-center justify-center cursor-not-allowed"
+              onMouseEnter={() => evadeYesButton(undefined, undefined, true)}
               onMouseMove={() => evadeYesButton()}
-              onPointerDown={() => evadeYesButton()}
+              onPointerDown={() => evadeYesButton(undefined, undefined, true)}
               style={{
                 transform: `translate(${yesBtnOffset.x}px, ${yesBtnOffset.y}px)`,
-                transition: 'transform 0.09s cubic-bezier(0.2, 1, 0.3, 1)',
+                transition: 'transform 0.42s cubic-bezier(0.22, 1, 0.36, 1)',
               }}
             >
               <button
@@ -2278,19 +2284,19 @@ function App() {
                 onMouseDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  evadeYesButton();
+                  evadeYesButton(undefined, undefined, true);
                 }}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  evadeYesButton();
+                  evadeYesButton(undefined, undefined, true);
                 }}
                 onPointerDown={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  evadeYesButton();
+                  evadeYesButton(undefined, undefined, true);
                 }}
-                className="px-5 py-2.5 rounded-xl font-mono text-xs font-bold uppercase tracking-wide bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 shadow-[0_0_20px_rgba(52,211,153,0.7)] cursor-not-allowed select-none transition-colors pointer-events-auto"
+                className="px-6 py-2.5 min-w-[96px] text-center whitespace-nowrap rounded-xl font-mono text-xs font-bold uppercase tracking-wide bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 shadow-[0_0_20px_rgba(52,211,153,0.7)] cursor-not-allowed select-none transition-all pointer-events-auto"
               >
                 {['Yes', 'Nope!', 'Too slow!', 'Missed me!', 'Haha nice try!', 'Can\'t catch me!', 'Almost!'][evasionCount % 7]}
               </button>
