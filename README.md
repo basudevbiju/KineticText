@@ -161,11 +161,6 @@ npm run preview
 
 ---
 
-## Team Contributions
-- **Blessen Tom Eappen:** Core thermodynamic engine architecture, Web Audio API bellows integration, Matter.js physics shatter implementation, particle explosion canvas, and enterprise glassmorphic design system.
-
----
-
 Made with ❤️ at TinkerHub Useless Projects 
 
 ![Static Badge](https://img.shields.io/badge/TinkerHub-24?color=%23000000&link=https%3A%2F%2Fwww.tinkerhub.org%2F)
