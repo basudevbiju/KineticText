@@ -459,19 +459,38 @@ function App() {
   const [showRestartToast, setShowRestartToast] = useState(false);
   const [yesBtnOffset, setYesBtnOffset] = useState({ x: 55, y: 0 });
   const [evasionCount, setEvasionCount] = useState(0);
+  const arenaRef = useRef<HTMLDivElement | null>(null);
 
-  const evadeYesButton = useCallback(() => {
+  const evadeYesButton = useCallback((fromX?: number, fromY?: number) => {
     setEvasionCount((c) => c + 1);
     const arenaWidth = 240;
     const arenaHeight = 70;
     let targetX = (Math.random() - 0.5) * arenaWidth;
     let targetY = (Math.random() - 0.5) * arenaHeight;
+    // Dodge away in the opposite direction of incoming mouse
+    if (typeof fromX === 'number' && typeof fromY === 'number') {
+      targetX = fromX > 0 ? -(40 + Math.random() * 70) : (40 + Math.random() * 70);
+      targetY = fromY > 0 ? -(15 + Math.random() * 20) : (15 + Math.random() * 20);
+    }
     // Keep away from the static "No" button on the left
     if (targetX < -30 && Math.abs(targetY) < 30) {
       targetX = targetX + 110;
     }
     setYesBtnOffset({ x: targetX, y: targetY });
   }, []);
+
+  const handleArenaMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!arenaRef.current) return;
+    const rect = arenaRef.current.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const mouseX = e.clientX - rect.left - centerX;
+    const mouseY = e.clientY - rect.top - centerY;
+    const dist = Math.hypot(mouseX - yesBtnOffset.x, mouseY - yesBtnOffset.y);
+    if (dist < 85) {
+      evadeYesButton(mouseX, mouseY);
+    }
+  }, [yesBtnOffset, evadeYesButton]);
 
   // Boot sequence simulation
   useEffect(() => {
@@ -2222,8 +2241,12 @@ function App() {
             Choose carefully. Unsaved words remain subject to thermal decay, entropy collapse, and meltdown.
           </p>
 
-          {/* Runaway Button Arena */}
-          <div className="relative w-full h-32 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 overflow-hidden mb-4 p-4">
+          {/* Runaway Button Arena with Proximity Detection */}
+          <div
+            ref={arenaRef}
+            onMouseMove={handleArenaMouseMove}
+            className="relative w-full h-32 flex items-center justify-center rounded-xl bg-slate-900 border border-slate-800 overflow-hidden mb-4 p-4"
+          >
             {/* No Button (Static, positioned reliably on the left) */}
             <div className="absolute left-6">
               <button
@@ -2237,25 +2260,37 @@ function App() {
               </button>
             </div>
 
-            {/* Yes Button (Dodge & Run Away!) */}
+            {/* Yes Button (Completely Unclickable — Dodges away on proximity!) */}
             <div
-              className="absolute pointer-events-auto"
+              className="absolute pointer-events-auto p-10 -m-10 flex items-center justify-center cursor-not-allowed"
+              onMouseEnter={() => evadeYesButton()}
+              onMouseMove={() => evadeYesButton()}
+              onPointerDown={() => evadeYesButton()}
               style={{
                 transform: `translate(${yesBtnOffset.x}px, ${yesBtnOffset.y}px)`,
-                transition: 'transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                transition: 'transform 0.09s cubic-bezier(0.2, 1, 0.3, 1)',
               }}
             >
               <button
-                onMouseEnter={evadeYesButton}
-                onMouseMove={evadeYesButton}
-                onPointerDown={evadeYesButton}
+                type="button"
+                tabIndex={-1}
+                aria-disabled="true"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  evadeYesButton();
+                }}
                 onClick={(e) => {
                   e.preventDefault();
-                  alert("💾 SAVE FAILED // Thermal core vaporized the disk sector. Entropy cannot be stored!");
-                  setShowSaveModal(false);
-                  window.setTimeout(() => textareaRef.current?.focus(), 50);
+                  e.stopPropagation();
+                  evadeYesButton();
                 }}
-                className="px-5 py-2.5 rounded-xl font-mono text-xs font-bold uppercase tracking-wide bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 shadow-[0_0_20px_rgba(52,211,153,0.7)] cursor-pointer select-none transition-colors"
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  evadeYesButton();
+                }}
+                className="px-5 py-2.5 rounded-xl font-mono text-xs font-bold uppercase tracking-wide bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 shadow-[0_0_20px_rgba(52,211,153,0.7)] cursor-not-allowed select-none transition-colors pointer-events-auto"
               >
                 {['Yes', 'Nope!', 'Too slow!', 'Missed me!', 'Haha nice try!', 'Can\'t catch me!', 'Almost!'][evasionCount % 7]}
               </button>
