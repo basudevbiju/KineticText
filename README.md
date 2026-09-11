@@ -126,7 +126,7 @@ KineticText turns writing into an active thermodynamic survival game. It replace
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/blessen-george/KineticText.git
+git clone https://github.com/basudevbiju/KineticText.git
 cd KineticText
 
 # 2. Install dependencies
