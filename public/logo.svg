@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.30" />
+      <stop offset="40%" stop-color="#06b6d4" stop-opacity="0.18" />
+      <stop offset="85%" stop-color="#030712" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#020617" />
+    </radialGradient>
+    <linearGradient id="primaryArc" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="50%" stop-color="#ef4444" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="45%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#67e8f9" />
+    </linearGradient>
+    <filter id="glowHigh" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background Base Canvas -->
+  <rect width="512" height="512" rx="96" fill="#030712" />
+  <rect width="512" height="512" rx="96" fill="url(#bgGlow)" />
+  <rect width="508" height="508" x="2" y="2" rx="94" stroke="#1e293b" stroke-width="3" stroke-opacity="0.8" />
+
+  <!-- Outer Telemetry Reticle Grid Ring -->
+  <circle cx="256" cy="256" r="180" stroke="#334155" stroke-width="1.5" stroke-dasharray="6 8" opacity="0.6" />
+  <circle cx="256" cy="256" r="148" stroke="#1e293b" stroke-width="2" opacity="0.8" />
+
+  <!-- Thermal Containment Arc (Amber Heat to Cryo Ice) -->
+  <path d="M 148,148 A 152,152 0 0,1 364,148" stroke="#f59e0b" stroke-width="14" stroke-linecap="round" filter="url(#glowHigh)" />
+  <path d="M 364,364 A 152,152 0 0,1 148,364" stroke="#06b6d4" stroke-width="14" stroke-linecap="round" filter="url(#glowHigh)" />
+
+  <!-- Reactor Core Hexagon -->
+  <polygon points="256,128 368,192 368,320 256,384 144,320 144,192" fill="#090d16" stroke="#38bdf8" stroke-width="3" stroke-opacity="0.4" />
+
+  <!-- Stylized Monospace Kinetic "K" Core -->
+  <path d="M 206,176 L 206,336 M 206,256 L 316,176 M 240,230 L 324,336"
+        stroke="url(#textGrad)"
+        stroke-width="26"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        filter="url(#glowHigh)" />
+
+  <!-- Calibration Crosshairs -->
+  <line x1="256" y1="84" x2="256" y2="108" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" />
+  <line x1="256" y1="404" x2="256" y2="428" stroke="#06b6d4" stroke-width="3" stroke-linecap="round" />
+  <line x1="84" y1="256" x2="108" y2="256" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" />
+  <line x1="404" y1="256" x2="428" y2="256" stroke="#06b6d4" stroke-width="3" stroke-linecap="round" />
+
+  <!-- Central Spark Dot -->
+  <circle cx="256" cy="256" r="8" fill="#ffffff" filter="url(#glowHigh)" />
+</svg>

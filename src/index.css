@@ -1,0 +1,618 @@
+@import "tailwindcss";
+
+/* =========================================================
+   KINETIC TEXT — CINEMATIC REACTOR CONTROL ROOM
+   Design System v2.0 — Reactor HUD + macOS Terminal Shell
+   ========================================================= */
+
+@theme {
+  --color-reactor-base: #05070d;
+  --color-reactor-surface: #0b0f1a;
+  --color-reactor-panel: #0d1220;
+  --color-reactor-border: rgba(255, 255, 255, 0.06);
+  --color-reactor-border-bright: rgba(255, 255, 255, 0.12);
+
+  /* Thermal Accent Palette */
+  --color-amber-glow: #f59e0b;
+  --color-amber-hot: #ea580c;
+  --color-cyan-frost: #22d3ee;
+  --color-cyan-ice: #67e8f9;
+  --color-emerald-nom: #10b981;
+  --color-rose-crit: #f43f5e;
+  --color-violet-nom: #7c3aed;
+
+  --font-display: 'Orbitron', sans-serif;
+  --font-mono: 'JetBrains Mono', 'ui-monospace', monospace;
+}
+
+/* =========================================================
+   BASE LAYER
+   ========================================================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  background-color: var(--color-reactor-base);
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% 10%, rgba(91, 33, 182, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 60% at 80% 90%, rgba(14, 116, 144, 0.04) 0%, transparent 50%);
+  color: #c8d3e8;
+  user-select: none;
+  font-family: var(--font-mono);
+}
+
+#root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* =========================================================
+   ENGINEERING DOT GRID — Desktop "Background"
+   ========================================================= */
+.dot-grid-desktop {
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+  background-size: 16px 16px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* =========================================================
+   macOS TERMINAL WINDOW CHROME
+   ========================================================= */
+.terminal-window {
+  position: relative;
+  background: rgba(8, 12, 22, 0.94);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(30, 41, 59, 0.85);
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(30, 41, 59, 0.8),
+    0 0 100px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.terminal-titlebar {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  background: rgba(6, 9, 18, 0.88);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0 12px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.terminal-titlebar::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
+/* Ambient top-edge glass bloom */
+.terminal-titlebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 12%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+}
+
+/* Traffic Light Buttons */
+.traffic-lights {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 1;
+}
+
+.tl-btn {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+}
+
+.tl-btn::after {
+  content: '';
+  position: absolute;
+  inset: 1px 1px 3px 1px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.35) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.tl-btn:hover {
+  transform: scale(1.2);
+}
+
+.tl-btn:active {
+  transform: scale(0.9);
+}
+
+.tl-red {
+  background: #ff5f57;
+  box-shadow: 0 0 4px rgba(255, 95, 87, 0.5);
+}
+.tl-red:hover {
+  box-shadow: 0 0 10px rgba(255, 95, 87, 0.9), 0 0 20px rgba(244, 63, 94, 0.5);
+}
+
+.tl-yellow {
+  background: #febc2e;
+  box-shadow: 0 0 4px rgba(254, 188, 46, 0.5);
+}
+.tl-yellow:hover {
+  box-shadow: 0 0 10px rgba(254, 188, 46, 0.9), 0 0 20px rgba(245, 158, 11, 0.5);
+}
+
+.tl-green {
+  background: #28c840;
+  box-shadow: 0 0 4px rgba(40, 200, 64, 0.5);
+}
+.tl-green:hover {
+  box-shadow: 0 0 10px rgba(40, 200, 64, 0.9), 0 0 20px rgba(16, 185, 129, 0.5);
+}
+
+/* Thermal accent overrides for traffic lights - keep flat/un-glowed by default */
+.tl-red.state-collapse {
+  /* Flat un-glowed state per specification */
+}
+
+.terminal-title-text {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(148, 163, 184, 0.6);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* =========================================================
+   CRT SCANLINES & NOISE TEXTURE
+   ========================================================= */
+.crt-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 100;
+  border-radius: inherit;
+}
+
+/* Responsive cryogenic breathing animation for absolute zero / thermal collapse */
+@keyframes cryo-breathe {
+  0%, 100% {
+    opacity: 0.99;
+    filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.15));
+  }
+  50% {
+    opacity: 0.87;
+    filter: drop-shadow(0 0 36px rgba(6, 182, 212, 0.40));
+  }
+}
+
+.crt-collapse {
+  animation: cryo-breathe 1.8s ease-in-out infinite;
+}
+
+/* Corner vignette for the terminal content pane */
+.terminal-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(6, 9, 18, 0.65) 0%, rgba(2, 4, 10, 0.95) 100%);
+  pointer-events: none;
+  z-index: 1;
+  border-radius: inherit;
+}
+
+/* =========================================================
+   THERMAL JITTER (ambient typography)
+   ========================================================= */
+@keyframes jitter {
+  0%   { transform: translate(0px, 0px); }
+  20%  { transform: translate(-1px, 0.75px); }
+  40%  { transform: translate(0.75px, -1px); }
+  60%  { transform: translate(-0.5px, -0.5px); }
+  80%  { transform: translate(1px, 0.5px); }
+  100% { transform: translate(0px, 0px); }
+}
+
+.animate-jitter {
+  animation: jitter 0.14s infinite linear;
+  will-change: transform;
+}
+
+/* =========================================================
+   PHOSPHOR CURSOR (blink rate driven by inline var)
+   ========================================================= */
+@keyframes cursor-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.phosphor-cursor {
+  display: inline-block;
+  color: currentColor;
+  animation: cursor-blink var(--cursor-blink-ms, 800ms) steps(1, end) infinite;
+  will-change: opacity;
+}
+
+/* =========================================================
+   TEXT GLOWS (multi-layer, 3-4 stacked shadows)
+   ========================================================= */
+.text-glow-amber {
+  text-shadow:
+    0 0 4px rgba(245, 158, 11, 0.9),
+    0 0 12px rgba(245, 158, 11, 0.65),
+    0 0 24px rgba(217, 119, 6, 0.45),
+    0 0 48px rgba(194, 65, 12, 0.25);
+}
+
+.text-glow-cyan {
+  text-shadow:
+    0 0 4px rgba(34, 211, 238, 0.9),
+    0 0 12px rgba(34, 211, 238, 0.65),
+    0 0 24px rgba(6, 182, 212, 0.45),
+    0 0 48px rgba(8, 145, 178, 0.25);
+}
+
+.text-glow-emerald {
+  text-shadow:
+    0 0 4px rgba(52, 211, 153, 0.9),
+    0 0 12px rgba(16, 185, 129, 0.65),
+    0 0 24px rgba(5, 150, 105, 0.4);
+}
+
+.text-glow-rose {
+  text-shadow:
+    0 0 4px rgba(244, 63, 94, 0.9),
+    0 0 12px rgba(244, 63, 94, 0.7),
+    0 0 28px rgba(225, 29, 72, 0.5),
+    0 0 56px rgba(190, 18, 60, 0.3);
+}
+
+/* =========================================================
+   BOX GLOWS
+   ========================================================= */
+.box-glow-amber {
+  box-shadow:
+    0 0 4px rgba(245, 158, 11, 0.4),
+    0 0 12px rgba(245, 158, 11, 0.2),
+    0 0 28px rgba(217, 119, 6, 0.12),
+    inset 0 0 8px rgba(245, 158, 11, 0.06);
+}
+
+.box-glow-cyan {
+  box-shadow:
+    0 0 4px rgba(34, 211, 238, 0.4),
+    0 0 12px rgba(34, 211, 238, 0.2),
+    0 0 28px rgba(6, 182, 212, 0.12),
+    inset 0 0 8px rgba(34, 211, 238, 0.06);
+}
+
+.box-glow-rose {
+  box-shadow:
+    0 0 8px rgba(244, 63, 94, 0.5),
+    0 0 20px rgba(244, 63, 94, 0.3),
+    0 0 45px rgba(225, 29, 72, 0.2),
+    inset 0 0 12px rgba(244, 63, 94, 0.08);
+}
+
+/* =========================================================
+   SEGMENTED THERMAL BAR — individual segment glow
+   ========================================================= */
+.segment-active-cold {
+  background: #67e8f9;
+  box-shadow: 0 0 4px rgba(103, 232, 249, 0.9), 0 0 10px rgba(34, 211, 238, 0.6);
+}
+.segment-active-nom {
+  background: #34d399;
+  box-shadow: 0 0 4px rgba(52, 211, 153, 0.9), 0 0 10px rgba(16, 185, 129, 0.5);
+}
+.segment-active-hot {
+  background: #fb923c;
+  box-shadow: 0 0 4px rgba(251, 146, 60, 0.9), 0 0 10px rgba(234, 88, 12, 0.6);
+}
+.segment-active-overheat {
+  background: #f43f5e;
+  box-shadow: 0 0 4px rgba(244, 63, 94, 0.9), 0 0 10px rgba(244, 63, 94, 0.7), 0 0 20px rgba(225, 29, 72, 0.4);
+}
+.segment-inactive {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* =========================================================
+   FROST & HEAT OVERLAYS (full-screen, fixed)
+   ========================================================= */
+.frost-overlay {
+  background: radial-gradient(
+    circle at center,
+    transparent 20%,
+    rgba(6, 182, 212, 0.1) 55%,
+    rgba(14, 116, 144, 0.32) 80%,
+    rgba(8, 51, 68, 0.6) 100%
+  );
+  box-shadow: inset 0 0 120px rgba(125, 211, 252, 0.3), inset 0 0 60px rgba(34, 211, 238, 0.15);
+}
+
+.heat-bloom-overlay {
+  background: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(245, 158, 11, 0.18) 0%,
+    rgba(234, 88, 12, 0.1) 30%,
+    transparent 70%
+  );
+  box-shadow: inset 0 0 140px rgba(245, 158, 11, 0.12), inset 0 0 60px rgba(234, 88, 12, 0.08);
+}
+
+.collapse-overlay {
+  background: radial-gradient(
+    circle at center,
+    transparent 30%,
+    rgba(244, 63, 94, 0.08) 60%,
+    rgba(190, 18, 60, 0.25) 90%
+  );
+}
+
+/* =========================================================
+   EXPLOSION / OVERHEAT DETONATION EFFECTS
+   ========================================================= */
+@keyframes explosion-flash {
+  0% {
+    opacity: 0.95;
+    background: radial-gradient(circle at center, #ffffff 0%, #fef08a 30%, #f59e0b 65%, #dc2626 100%);
+  }
+  15% {
+    opacity: 0.88;
+    background: radial-gradient(circle at center, #fef08a 0%, #f59e0b 35%, #ea580c 70%, #7f1d1d 100%);
+  }
+  40% {
+    opacity: 0.55;
+    background: radial-gradient(circle at center, #f97316 10%, #dc2626 60%, rgba(20, 0, 0, 0.85) 100%);
+  }
+  75% {
+    opacity: 0.25;
+    background: radial-gradient(circle at center, #b91c1c 20%, transparent 80%);
+  }
+  100% {
+    opacity: 0;
+    background: transparent;
+  }
+}
+
+.explosion-flash-overlay {
+  animation: explosion-flash 1.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+}
+
+@keyframes explosion-shake {
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  6%   { transform: translate(-15px, -12px) scale(1.025) rotate(-1.6deg); }
+  14%  { transform: translate(14px, 10px) scale(1.03) rotate(1.4deg); }
+  22%  { transform: translate(-12px, 11px) scale(1.02) rotate(-1.2deg); }
+  32%  { transform: translate(10px, -9px) scale(1.015) rotate(0.9deg); }
+  44%  { transform: translate(-8px, 7px) scale(1.01) rotate(-0.7deg); }
+  56%  { transform: translate(6px, -5px) scale(1.006) rotate(0.5deg); }
+  70%  { transform: translate(-4px, 3px) scale(1.003) rotate(-0.3deg); }
+  84%  { transform: translate(2px, -2px) scale(1.001) rotate(0.1deg); }
+  100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+}
+
+.animate-explosion-shake {
+  animation: explosion-shake 1.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes blast-glitch {
+  0%, 100% { clip-path: inset(0 0 0 0); }
+  20% { clip-path: inset(15% 0 55% 0); transform: skewX(-3deg); }
+  40% { clip-path: inset(45% 0 10% 0); transform: skewX(4deg); }
+  60% { clip-path: inset(70% 0 5% 0); transform: skewX(-2deg); }
+  80% { clip-path: inset(5% 0 75% 0); transform: skewX(2deg); }
+}
+
+.animate-blast-glitch {
+  animation: blast-glitch 0.22s steps(2, start) infinite;
+}
+
+/* =========================================================
+   INDUSTRIAL HAZARD FLOOR BASELINE
+   Diagonal warning stripes — bottom of physics viewport
+   ========================================================= */
+.hazard-baseline {
+  height: 6px;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(245, 158, 11, 0.55) 0px,
+    rgba(245, 158, 11, 0.55) 6px,
+    rgba(0, 0, 0, 0.6) 6px,
+    rgba(0, 0, 0, 0.6) 12px
+  );
+  border-top: 1.5px solid rgba(245, 158, 11, 0.5);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 35;
+  box-shadow: 0 -4px 16px rgba(245, 158, 11, 0.15), 0 -1px 6px rgba(245, 158, 11, 0.3);
+}
+
+/* =========================================================
+   PHYSICAL KEYCAP STYLES
+   Beveled, embossed look with inset shadows
+   ========================================================= */
+.keycap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 2px 6px;
+  border-radius: 0.375rem;
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgb(71, 85, 105);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  white-space: nowrap;
+  position: relative;
+  top: 0;
+  transition: top 0.05s, box-shadow 0.05s;
+  user-select: none;
+}
+
+.keycap:active {
+  top: 1px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.06),
+    0 1px 2px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* =========================================================
+   STATUS PILL — SPRING EASE TRANSITIONS
+   ========================================================= */
+@keyframes pill-spring-in {
+  0%   { transform: scale(0.92); opacity: 0.7; }
+  60%  { transform: scale(1.04); opacity: 1; }
+  80%  { transform: scale(0.98); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.status-pill-enter {
+  animation: pill-spring-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* =========================================================
+   AMBIENT BACKGROUND GLOW — shifts with thermal state
+   ========================================================= */
+.ambient-nominal {
+  background: radial-gradient(ellipse 100% 60% at 50% 0%, rgba(91, 33, 182, 0.08) 0%, transparent 70%);
+}
+.ambient-hot {
+  background: radial-gradient(ellipse 100% 60% at 50% 0%, rgba(245, 158, 11, 0.1) 0%, transparent 70%);
+}
+.ambient-cold {
+  background: radial-gradient(ellipse 100% 60% at 50% 0%, rgba(6, 182, 212, 0.08) 0%, transparent 70%);
+}
+.ambient-collapse {
+  background: radial-gradient(ellipse 100% 60% at 50% 0%, rgba(244, 63, 94, 0.12) 0%, transparent 70%);
+}
+.ambient-detonation {
+  background: radial-gradient(ellipse 120% 80% at 50% 20%, rgba(239, 68, 68, 0.35) 0%, rgba(245, 158, 11, 0.25) 35%, rgba(185, 28, 28, 0.15) 60%, transparent 80%);
+}
+
+/* =========================================================
+   VU METER BARS
+   ========================================================= */
+@keyframes vu-pulse {
+  0%, 100% { transform: scaleY(0.4); }
+  50%       { transform: scaleY(1); }
+}
+.vu-bar {
+  transform-origin: bottom;
+  animation: vu-pulse var(--vu-delay, 0.3s) ease-in-out infinite;
+}
+
+/* =========================================================
+   ENTROPY SPARKLINE
+   ========================================================= */
+.sparkline-path {
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* =========================================================
+   GUTTER LINE NUMBERS
+   ========================================================= */
+.gutter-line {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #475569;
+  text-align: right;
+  user-select: none;
+  pointer-events: none;
+  line-height: 1.6em;
+  white-space: nowrap;
+}
+
+.gutter-energy {
+  font-size: 8px;
+  color: #475569;
+}
+
+/* =========================================================
+   CINEMATIC CAMERA RIG & LOADING SCREEN
+   ========================================================= */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes spin-reverse-slow {
+  from { transform: rotate(360deg); }
+  to   { transform: rotate(0deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 14s linear infinite;
+}
+
+.animate-spin-reverse-slow {
+  animation: spin-reverse-slow 9s linear infinite;
+}
+
+.camera-stage {
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
+}
