@@ -616,3 +616,144 @@ body {
   perspective-origin: 50% 50%;
   transform-style: preserve-3d;
 }
+
+/* =========================================================
+   LIGHT THEME OVERRIDES (.theme-light)
+   Cleanroom / Advanced Research Laboratory Aesthetic
+   ========================================================= */
+.theme-light {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.theme-light .dot-grid-desktop {
+  background-image: radial-gradient(circle, rgba(100, 116, 139, 0.3) 1px, transparent 1px);
+}
+
+.theme-light .terminal-window {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(203, 213, 225, 0.95);
+  box-shadow:
+    0 25px 50px -12px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(226, 232, 240, 0.9),
+    0 0 60px rgba(148, 163, 184, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.theme-light .terminal-titlebar {
+  background: rgba(248, 250, 252, 0.96);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.theme-light .terminal-titlebar::after {
+  background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.25), transparent);
+}
+
+.theme-light .terminal-titlebar::before {
+  background: linear-gradient(90deg, transparent, rgba(203, 213, 225, 0.6), transparent);
+}
+
+.theme-light .terminal-title-text {
+  color: #475569;
+}
+
+.theme-light .crt-scanlines {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(15, 23, 42, 0.015) 2px,
+    rgba(15, 23, 42, 0.015) 4px
+  );
+}
+
+.theme-light .terminal-vignette {
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0) 65%, rgba(226, 232, 240, 0.45) 100%);
+}
+
+.theme-light header {
+  background-color: rgba(248, 250, 252, 0.95) !important;
+  border-bottom-color: rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.05);
+}
+
+.theme-light header h1 {
+  color: #0f172a !important;
+}
+
+.theme-light main {
+  background-color: rgba(255, 255, 255, 0.94) !important;
+}
+
+.theme-light aside {
+  background: rgba(248, 250, 252, 0.95) !important;
+  border-right-color: rgba(226, 232, 240, 0.9) !important;
+}
+
+.theme-light .gutter-line,
+.theme-light .gutter-energy {
+  color: #64748b !important;
+}
+
+.theme-light footer {
+  background-color: rgba(248, 250, 252, 0.95) !important;
+  border-top-color: rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 -4px 12px -2px rgba(15, 23, 42, 0.05);
+}
+
+.theme-light .keycap {
+  background: rgba(241, 245, 249, 0.95);
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.theme-light .keycap:active {
+  background: #e2e8f0;
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.theme-light .segment-inactive {
+  background: rgba(203, 213, 225, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* Light mode card containers in header and footer */
+.theme-light header .bg-white\/\[0\.04\],
+.theme-light header .bg-white\/\[0\.03\],
+.theme-light footer .bg-white\/\[0\.03\],
+.theme-light footer .bg-white\/\[0\.02\] {
+  background-color: rgba(241, 245, 249, 0.9) !important;
+  border-color: rgba(203, 213, 225, 0.85) !important;
+}
+
+.theme-light header .text-slate-100,
+.theme-light header .text-slate-200,
+.theme-light header .text-slate-300 {
+  color: #0f172a !important;
+}
+
+.theme-light header .text-slate-400,
+.theme-light footer .text-slate-400,
+.theme-light footer .text-slate-500 {
+  color: #475569 !important;
+}
+
+/* Ambient glow subtle adjustment for light mode */
+.theme-light.ambient-nominal {
+  background: radial-gradient(ellipse 100% 60% at 50% 0%, rgba(99, 102, 241, 0.06) 0%, transparent 70%);
+}
+.theme-light.ambient-hot {
+  background: radial-gradient(ellipse 100% 60% at 50% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 70%);
+}
+.theme-light.ambient-cold {
+  background: radial-gradient(ellipse 100% 60% at 50% 0%, rgba(6, 182, 212, 0.07) 0%, transparent 70%);
+}
+.theme-light.ambient-collapse {
+  background: radial-gradient(ellipse 100% 60% at 50% 0%, rgba(244, 63, 94, 0.08) 0%, transparent 70%);
+}
+

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { Flame, Snowflake, Mic, MicOff, RotateCcw, Zap, AlertTriangle, Wind, Activity, Terminal } from 'lucide-react';
+import { Flame, Snowflake, Mic, MicOff, RotateCcw, Zap, AlertTriangle, Wind, Activity, Terminal, Sun, Moon } from 'lucide-react';
 import Matter from 'matter-js';
 import LetterGlitch from './LetterGlitch';
 
@@ -381,6 +381,27 @@ function App() {
   const [entropyWords, setEntropyWords] = useState(0);
   const [tempHistory, setTempHistory] = useState<number[]>([DEFAULT_TEMP]);
   const [prevTemp, setPrevTemp] = useState<number>(DEFAULT_TEMP);
+
+  // ─── THEME SYSTEM (DARK / LIGHT) ──────────────────────────────────────────
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    try {
+      return (localStorage.getItem('kt-theme') as 'dark' | 'light') || 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      try {
+        localStorage.setItem('kt-theme', next);
+      } catch {
+        // noop
+      }
+      return next;
+    });
+  }, []);
 
   // Sync textRef with text
   useEffect(() => {
@@ -1029,11 +1050,14 @@ function App() {
       } else if (key === 'I') {
         e.preventDefault();
         setShowInstructions((prev) => !prev);
+      } else if (key === 'L') {
+        e.preventDefault();
+        toggleTheme();
       }
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-  }, [reignite, triggerExplosion, replayBoot]);
+  }, [reignite, triggerExplosion, replayBoot, toggleTheme]);
 
   // ─── MODAL SHORTCUTS (Escape to close Save modal, Enter/Space for instructions) ──
   useEffect(() => {
@@ -1246,10 +1270,20 @@ function App() {
   }
 
   // Text color
-  let textThemeClass = 'text-slate-100';
-  if (isExploding) textThemeClass = 'text-amber-200 text-glow-amber animate-blast-glitch';
-  else if (thermalZone === 'hot') textThemeClass = 'text-amber-400 text-glow-amber animate-jitter';
-  else if (thermalZone === 'cold' || thermalZone === 'collapse') textThemeClass = 'text-cyan-300 text-glow-cyan';
+  let textThemeClass = theme === 'light' ? 'text-slate-900' : 'text-slate-100';
+  if (isExploding) {
+    textThemeClass = theme === 'light'
+      ? 'text-red-600 font-bold animate-blast-glitch'
+      : 'text-amber-200 text-glow-amber animate-blast-glitch';
+  } else if (thermalZone === 'hot') {
+    textThemeClass = theme === 'light'
+      ? 'text-amber-600 font-semibold animate-jitter'
+      : 'text-amber-400 text-glow-amber animate-jitter';
+  } else if (thermalZone === 'cold' || thermalZone === 'collapse') {
+    textThemeClass = theme === 'light'
+      ? 'text-cyan-700 font-medium'
+      : 'text-cyan-300 text-glow-cyan';
+  }
 
   // Frost overlay opacity
   const frostOpacity = displayTemp <= 20.0 ? clamp((20.0 - displayTemp) / 20.0, 0, 1) : 0;
@@ -1286,6 +1320,18 @@ function App() {
 
   // Dynamic glitch colors for LetterGlitch driven by reactor thermal state
   const glitchColors = useMemo(() => {
+    if (theme === 'light') {
+      if (isExploding) {
+        return ['#dc2626', '#ea580c', '#f59e0b', '#f97316', '#ef4444'];
+      }
+      if (thermalZone === 'collapse' || thermalZone === 'cold') {
+        return ['#0284c7', '#06b6d4', '#38bdf8', '#7dd3fc', '#0369a1'];
+      }
+      if (thermalZone === 'hot') {
+        return ['#ea580c', '#d97706', '#f59e0b', '#f97316', '#b45309'];
+      }
+      return ['#cbd5e1', '#94a3b8', '#64748b', '#0d9488', '#0284c7'];
+    }
     if (isExploding) {
       return ['#450a0a', '#7f1d1d', '#b91c1c', '#ea580c', '#f59e0b'];
     }
@@ -1297,11 +1343,11 @@ function App() {
     }
     // Nominal: cybernetic deep emerald & cyan
     return ['#022c22', '#064e3b', '#0f766e', '#10b981', '#06b6d4'];
-  }, [isExploding, thermalZone]);
+  }, [isExploding, thermalZone, theme]);
 
   // ─── RENDER ────────────────────────────────────────────────────────────────
   return (
-    <div className={`relative w-full h-full min-h-screen overflow-hidden ${ambientClass}`}>
+    <div className={`relative w-full h-full min-h-screen overflow-hidden ${theme === 'light' ? 'theme-light' : ''} ${ambientClass}`}>
       {/* ── Fixed Full-Screen Cybernetic LetterGlitch Background Mesh (React Bits) ── */}
       <div className="fixed inset-0 w-screen h-screen pointer-events-none z-0 overflow-hidden opacity-30 transition-opacity duration-700" aria-hidden="true">
         <LetterGlitch
@@ -1310,7 +1356,7 @@ function App() {
           centerVignette={true}
           outerVignette={true}
           smooth={true}
-          backgroundColor="#05070d"
+          backgroundColor={theme === 'light' ? '#f1f5f9' : '#05070d'}
         />
       </div>
 
@@ -1805,6 +1851,30 @@ function App() {
               <RotateCcw className="w-3 h-3" aria-hidden="true" />
               <span>Reignite</span>
             </MagneticButton>
+
+            {/* Magnetic Theme Switcher Button */}
+            <MagneticButton
+              onClick={toggleTheme}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono font-medium uppercase tracking-wide rounded-xl border transition-all ${
+                theme === 'light'
+                  ? 'bg-amber-100/90 hover:bg-amber-200/90 text-amber-900 border-amber-300 shadow-sm'
+                  : 'bg-white/[0.03] hover:bg-white/[0.08] text-slate-300 hover:text-white border border-white/[0.08] hover:border-white/20'
+              }`}
+              title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode (Shift+L)`}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              {theme === 'dark' ? (
+                <>
+                  <Sun className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
+                  <span>Light</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-3.5 h-3.5 text-amber-900" aria-hidden="true" />
+                  <span>Dark</span>
+                </>
+              )}
+            </MagneticButton>
           </div>
         </header>
 
@@ -1976,10 +2046,10 @@ function App() {
                       <span
                         className={`phosphor-cursor inline-block ${
                           thermalZone === 'hot'
-                            ? 'text-amber-400'
+                            ? theme === 'light' ? 'text-amber-600' : 'text-amber-400'
                             : thermalZone === 'cold' || thermalZone === 'collapse'
-                            ? 'text-cyan-400'
-                            : 'text-slate-300'
+                            ? theme === 'light' ? 'text-cyan-600' : 'text-cyan-400'
+                            : theme === 'light' ? 'text-slate-900' : 'text-slate-300'
                         }`}
                         style={{
                           '--cursor-blink-ms': `${cursorBlinkMs}ms`,
@@ -1996,10 +2066,10 @@ function App() {
                       <span
                         className={`phosphor-cursor inline-block mr-1.5 ${
                           thermalZone === 'hot'
-                            ? 'text-amber-400'
+                            ? theme === 'light' ? 'text-amber-600' : 'text-amber-400'
                             : thermalZone === 'cold' || thermalZone === 'collapse'
-                            ? 'text-cyan-400'
-                            : 'text-slate-300'
+                            ? theme === 'light' ? 'text-cyan-600' : 'text-cyan-400'
+                            : theme === 'light' ? 'text-slate-900' : 'text-slate-300'
                         }`}
                         style={{
                           '--cursor-blink-ms': `${cursorBlinkMs}ms`,
@@ -2008,7 +2078,7 @@ function App() {
                         █
                       </span>
                     )}
-                    <span className="text-slate-700/60 select-none">
+                    <span className={theme === 'light' ? 'text-slate-400 select-none' : 'text-slate-700/60 select-none'}>
                       {isExploding
                         ? '💥 CRITICAL DETONATION: TEXT INCINERATED IN MELTDOWN...'
                         : isFailed
@@ -2124,6 +2194,7 @@ function App() {
             >
               {[
                 { key: 'Shift+I', label: 'RULES' },
+                { key: 'Shift+L', label: 'THEME' },
                 { key: 'Shift+F', label: 'FREEZE' },
                 { key: 'Shift+H', label: 'DETONATE' },
                 { key: 'Shift+R', label: 'FLUSH' },
