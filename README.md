@@ -21,7 +21,7 @@
 
 ## Basic Details
 
-### Team Name: Entropy Forge
+### Team Name: Alkul
 
 ### Team Members
 - Team Lead: Basudev Biju
